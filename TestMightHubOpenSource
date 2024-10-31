@@ -35,6 +35,11 @@ local MyBeli = game:GetService("Players").LocalPlayer.Data.Beli.Value
 local MyFragment = game:GetService("Players").LocalPlayer.Data.Fragments.Value
 local MyLevel = game:GetService("Players").LocalPlayer.Data.Level.Value
 
+-- Set default team to avoid nil errors
+if not _G.Team then
+    _G.Team = "Pirates"  -- Default to "Pirates" if _G.Team is not defined
+end
+
 ---- AntiBan
 function AntiBan()
 for i,v in pairs(game:GetService("Players").LocalPlayer.Character:GetDescendants()) do
@@ -54,12 +59,14 @@ end
 end
 AntiBan()
 
-if not game:IsLoaded() then repeat game.Loaded:Wait() until game:IsLoaded() end
+-- Ensure game is fully loaded with a wait
+if not game:IsLoaded() then
+    repeat
+        wait(0.5)  -- Adding a delay to prevent unnecessary rapid looping
+    until game:IsLoaded()
+end
 
---- Check What Sea ------
-First_Sea = false
-Second_Sea = false
-Third_Sea = false
+local First_Sea, Second_Sea, Third_Sea = false, false, false
 local placeId = game.PlaceId
 if placeId == 2753915549 then
 First_Sea = true
@@ -67,29 +74,33 @@ elseif placeId == 4442272183 then
 Second_Sea = true
 elseif placeId == 7449423635 then
 Third_Sea = true
-end
-
----- Auto Choose Team ------
-if game:GetService("Players").LocalPlayer.PlayerGui.Main:FindFirstChild("ChooseTeam") then
-repeat wait()
-if game:GetService("Players").LocalPlayer.PlayerGui:WaitForChild("Main").ChooseTeam.Visible == true then
-if _G.Team == "Pirates" then
-for i, v in pairs(getconnections(game:GetService("Players").LocalPlayer.PlayerGui.Main.ChooseTeam.Container.Pirates.Frame.ViewportFrame.TextButton.Activated)) do                                                                                                
-v.Function()
-end
-elseif _G.Team == "Marines" then
-for i, v in pairs(getconnections(game:GetService("Players").LocalPlayer.PlayerGui.Main.ChooseTeam.Container.Marines.Frame.ViewportFrame.TextButton.Activated)) do                                                                                                
-v.Function()
-end
 else
-for i, v in pairs(getconnections(game:GetService("Players").LocalPlayer.PlayerGui.Main.ChooseTeam.Container.Pirates.Frame.ViewportFrame.TextButton.Activated)) do                                                                                                
-v.Function()
-end
-end
-end
-until game.Players.LocalPlayer.Team ~= nil and game:IsLoaded()
+game.Players.LocalPlayer:Kick("Not Blox Fruit!")
 end
 
+if game:GetService("Players").LocalPlayer.PlayerGui.Main:FindFirstChild("ChooseTeam") then
+    repeat
+        wait(0.1)  -- Add a delay to avoid rapid looping
+        local chooseTeamGui = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Main")
+        if chooseTeamGui and chooseTeamGui.ChooseTeam.Visible then
+            local team = _G.Team or "Pirates"
+            local container = chooseTeamGui.ChooseTeam.Container
+            if team == "Pirates" and container:FindFirstChild("Pirates") then
+                for _, v in pairs(getconnections(container.Pirates.Frame.ViewportFrame.TextButton.Activated)) do
+                    v.Function()
+                end
+            elseif team == "Marines" and container:FindFirstChild("Marines") then
+                for _, v in pairs(getconnections(container.Marines.Frame.ViewportFrame.TextButton.Activated)) do
+                    v.Function()
+                end
+            else
+                for _, v in pairs(getconnections(container.Pirates.Frame.ViewportFrame.TextButton.Activated)) do
+                    v.Function()
+                end
+            end
+        end
+    until game.Players.LocalPlayer.Team ~= nil or not game:IsLoaded()
+end
 setfpscap(120)
 
 --- Check Moon Status Id Textures
@@ -190,9 +201,6 @@ QuestLvBoss = 3
 RewardBoss = "Reward:\n$15,000\n4,000,000 Exp."
 CFrameQBoss = CFrame.new(61122.65234375, 18.497442245483, 1569.3997802734)
 CFrameBoss = CFrame.new(61260.15234375, 30.950881958008, 1193.4329833984)
-if _G.AutoBoss and (CFrameBoss.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude > 3000 then
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance",Vector3.new(61163.8515625, 11.6796875, 1819.7841796875))
-end
 elseif SelectBoss == "Wysper" then
 BossMon = "Wysper"
 NameBoss = 'Wysper'
@@ -201,9 +209,6 @@ QuestLvBoss = 3
 RewardBoss = "Reward:\n$15,000\n4,800,000 Exp."
 CFrameQBoss = CFrame.new(-7861.947265625, 5545.517578125, -379.85974121094)
 CFrameBoss = CFrame.new(-7866.1333007813, 5576.4311523438, -546.74816894531)
-if _G.AutoBoss and (CFrameBoss.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude > 3000 then
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance",Vector3.new(-4607.82275, 872.54248, -1667.55688))
-end
 elseif SelectBoss == "Thunder God" then
 BossMon = "Thunder God"
 NameBoss = 'Thunder God'
@@ -212,9 +217,6 @@ QuestLvBoss = 3
 RewardBoss = "Reward:\n$20,000\n5,800,000 Exp."
 CFrameQBoss = CFrame.new(-7903.3828125, 5635.9897460938, -1410.923828125)
 CFrameBoss = CFrame.new(-7994.984375, 5761.025390625, -2088.6479492188)
-if _G.AutoBoss and (CFrameBoss.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude > 3000 then
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance",Vector3.new(-4607.82275, 872.54248, -1667.55688))
-end
 elseif SelectBoss == "Cyborg" then
 BossMon = "Cyborg"
 NameBoss = 'Cyborg'
@@ -294,9 +296,6 @@ elseif SelectBoss == "Cursed Captain" then
 BossMon = "Cursed Captain"
 NameBoss = 'Cursed Captain'
 CFrameBoss = CFrame.new(916.928589, 181.092773, 33422)
-if _G.AutoBoss and (CFrameBoss.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude > 20000 then
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance",Vector3.new(923.21252441406, 126.9760055542, 32852.83203125))
-end
 elseif SelectBoss == "Order" then
 BossMon = "Order"
 NameBoss = 'Order'
@@ -410,4 +409,19 @@ elseif SelectMaterial == "Fish Tail" then
 if Third_Sea then
 MMon = {"Fishman Raider","Fishman Captain"}
 MPos = CFrame.new(-10553.268554688, 521.38439941406, -8176.9458007813) or CFrame.new(-10789.401367188, 427.18637084961, -9131.4423828125)
-SP =
+SP = "Default"
+elseif First_Sea then
+MMon = {"Fishman Warrior","Fishman Commando"}
+MPos = CFrame.new(60844.10546875, 98.462875366211, 1298.3985595703) or CFrame.new(61738.3984375, 64.207321166992, 1433.8375244141)
+SP = "Default"
+if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - Vector3.new(61163.8515625, 5.342342376708984, 1819.7841796875)).Magnitude >= 17000 then
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance",Vector3.new(61163.8515625, 5.342342376708984, 1819.7841796875))
+end
+end
+elseif SelectMaterial == "Gunpowder" then
+MMon = {"Pistol Billionaire"}
+MPos = CFrame.new(-236.53652954102, 217.46676635742, 6006.0883789063)
+SP = "Default"
+elseif SelectMaterial == "Mini Tusk" then
+MMon = {"Mythological Pirate"}
+MPos = CFrame.new(
